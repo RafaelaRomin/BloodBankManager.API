@@ -30,10 +30,6 @@ namespace BloodBankManager.Application.Validators
                 .WithMessage("É preciso informar um doador para concluir o registro da doação!");
 
             RuleFor(d => d.DonationDate)
-                .LessThanOrEqualTo(DateTime.Now)
-                .WithMessage("Não é possível registrar uma doação com a data maior que a de agora!");
-
-            RuleFor(d => d.DonationDate)
                 .NotNull()
                 .NotEmpty()
                 .WithMessage("Informe uma data de doação!");
