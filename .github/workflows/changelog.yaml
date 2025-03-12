@@ -2,15 +2,25 @@ name: Generate Changelog
 
 on:
   schedule:
-    - cron: '0 12 * * 1' #toda segunda-feira 12h
+    - cron: '0 12 * * 1' # Roda toda segunda-feira 12h
   workflow_dispatch: # Permite rodar manualmente 
+
+permissions:
+  contents: write 
 
 jobs:
   generate-changelog:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Get All Pull Requests merged
         uses: actions/github-script@v6
@@ -19,7 +29,7 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const since = new Date();
-            since.setDate(since.getDate() - 7); // Últimos 7 dias
+            since.setDate(since.getDate() - 7); //Last 7 days
 
             const pulls = await github.paginate(
               github.rest.pulls.list,
@@ -46,6 +56,35 @@ jobs:
           # Obter commits dos últimos 7 dias
           commits=$(git log --pretty=format:"- %s (%h) by %an" --since="1 week ago")
 
+          # Categorizar commits
+          echo "## 🔥 Novas Features" >> changelog.md
+          echo "$commits" | grep -iE "(add|new|feature|create|implement|🚀)" || echo "Nenhuma nova funcionalidade." >> changelog.md
+          echo "" >> changelog.md
+
+          echo "## 🛠 Alterações" >> changelog.md
+          echo "$commits" | grep -iE "(update|change|modify|refactor|🔄)" || echo "Nenhuma alteração relevante." >> changelog.md
+          echo "" >> changelog.md
+
+          echo "## ⚠️ Quebras de Compatibilidade" >> changelog.md
+          echo "$commits" | grep -iE "(remove|delete|break|incompatible|❌)" || echo "Nenhuma quebra detectada." >> changelog.md
+          echo "" >> changelog.md
+
+          # Adicionar PRs ao changelog
+          echo "## ✅ Pull Requests Merged" >> changelog.md
+          cat pr_changelog.md >> changelog.md
+          echo "" >> changelog.md
+
+          cat changelog.md
+            require("fs").writeFileSync("pr_changelog.md", mergedPRs.length ? mergedPRs.join("\n") : "No updates this week.");
+
+      - name: Get Commits from last week
+        run: |
+          echo "# 🆕 Changelog - $(date +'%d/%m/%Y')" > changelog.md
+          echo "" >> changelog.md
+
+          # Obter commits dos últimos 7 dias
+          commits=$(git log --pretty=format:"- %s (%h) by %an" --since="1 week ago")
+
           echo "## 🛠 Alterações" >> changelog.md
           echo "$commits" | grep -iE "(update|change|modify|refactor|🔄)" || echo "Nenhuma alteração relevante." >> changelog.md
           echo "" >> changelog.md
@@ -57,11 +96,12 @@ jobs:
 
           cat changelog.md
 
-      - name: Commit and Changelog Push
+      - name: Commit and Push Changelog
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add changelog.md
           git commit -m "📝 Update Changelog"
-          git push
-        continue-on-error: true 
+          git branch -M master # Garante que está na branch correta
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
