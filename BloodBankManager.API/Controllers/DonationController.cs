@@ -31,11 +31,11 @@ namespace BloodBankManager.API.Controllers
         [HttpGet("last-30-days")]
         public async Task<IActionResult> GetLast30Days()
         {
-           var query = new GetDonationsRelatoryQuery();
-           
-           var donationsLast30Days = await _mediator.Send(query);
+            var query = new GetDonationsRelatoryQuery();
 
-           return Ok(donationsLast30Days);
+            var donationsLast30Days = await _mediator.Send(query);
+
+            return Ok(donationsLast30Days);
         }
 
         [HttpGet("{id}")]
@@ -50,6 +50,15 @@ namespace BloodBankManager.API.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Post(CreateDonationCommand createDonationCommand)
+        {
+            var id = await _mediator.Send(createDonationCommand);
+
+            return CreatedAtAction(nameof(GetById), new { id }, createDonationCommand);
+        }
+
+
+        [HttpPut]
+        public async Task<IActionResult> Update(CreateDonationCommand createDonationCommand)
         {
             var id = await _mediator.Send(createDonationCommand);
 
