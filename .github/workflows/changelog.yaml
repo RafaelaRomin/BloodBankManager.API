@@ -1,0 +1,16 @@
+name: Generate Changelog
+on:
+  push:
+    branches:
+      - master
+jobs:
+  generate-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Generate Changelog
+        run: |
+          git log --pretty=format:"- %s (%h) by %an" --since="1 week ago" > changelog.md
+          cat changelog.md
