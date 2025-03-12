@@ -55,11 +55,12 @@ jobs:
       - name: Changelog
         run: cat changelog.md
 
-      - name: Commit and Changelog Push
+      - name: Commit and Push Changelog
         run: |
           git add changelog.md
           git commit -m "📝 Update Changelog"
-          git push origin HEAD:master
-        continue-on-error: true 
+          git branch -M master # Garante que está na branch correta
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
