@@ -5,12 +5,22 @@ on:
     - cron: '0 12 * * 1' #toda segunda-feira 12h
   workflow_dispatch: # Permite rodar manualmente 
 
+permissions:
+  contents: write 
+
 jobs:
   generate-changelog:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Get All Pull Requests merged
         uses: actions/github-script@v6
@@ -19,7 +29,7 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const since = new Date();
-            since.setDate(since.getDate() - 7); // Últimos 7 dias
+            since.setDate(since.getDate() - 7); // Last 7 days 
 
             const pulls = await github.paginate(
               github.rest.pulls.list,
@@ -42,14 +52,14 @@ jobs:
 
             require("fs").writeFileSync("changelog.md", changelogContent);
 
-      - name: Exibir Changelog
+      - name: Changelog
         run: cat changelog.md
 
       - name: Commit and Changelog Push
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add changelog.md
           git commit -m "📝 Update Changelog"
-          git push
+          git push origin HEAD:master
         continue-on-error: true 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
