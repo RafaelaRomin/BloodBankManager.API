@@ -60,7 +60,7 @@ namespace BloodBankManager.API.Controllers
             return Ok(donor);
         }
 
-        [HttpGet("{id}/donations")]
+        [HttpGet("{id}/all-donations")]
         public async Task<IActionResult> GetDonationsOfDonor(int id)
         {
             var query = new GetAllDonationsByDonorIdQuery(id);

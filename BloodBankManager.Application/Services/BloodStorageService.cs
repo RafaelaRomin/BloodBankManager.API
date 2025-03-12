@@ -19,13 +19,11 @@ namespace BloodBankManager.Application.Services
             var donor = await _donorRepository.GetDonorByIdAsync(donorId);
 
             var storage = await _bloodStorageRepository
-                                .GetBloodTypeAndRhFactor(donor.BloodType, donor.RhFactor);
+                .GetBloodTypeAndRhFactor(donor.BloodType, donor.RhFactor);
 
-           storage.UpdateQuantity(quantityMl);
+            storage.UpdateQuantity(quantityMl);
 
             _bloodStorageRepository.UpdateStorage(storage);
-
-
         }
     }
 }

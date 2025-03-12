@@ -75,6 +75,26 @@ jobs:
           echo "" >> changelog.md
 
           cat changelog.md
+            require("fs").writeFileSync("pr_changelog.md", mergedPRs.length ? mergedPRs.join("\n") : "No updates this week.");
+
+      - name: Get Commits from last week
+        run: |
+          echo "# 🆕 Changelog - $(date +'%d/%m/%Y')" > changelog.md
+          echo "" >> changelog.md
+
+          # Obter commits dos últimos 7 dias
+          commits=$(git log --pretty=format:"- %s (%h) by %an" --since="1 week ago")
+
+          echo "## 🛠 Alterações" >> changelog.md
+          echo "$commits" | grep -iE "(update|change|modify|refactor|🔄)" || echo "Nenhuma alteração relevante." >> changelog.md
+          echo "" >> changelog.md
+
+          # Adicionar PRs ao changelog
+          echo "## ✅ Pull Requests Merged" >> changelog.md
+          cat pr_changelog.md >> changelog.md
+          echo "" >> changelog.md
+
+          cat changelog.md
 
       - name: Commit and Push Changelog
         run: |
