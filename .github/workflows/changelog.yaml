@@ -42,39 +42,53 @@ jobs:
               }
             );
 
-            const mergedPRs = pulls
-              .filter(pr => pr.merged_at && new Date(pr.merged_at) >= since)
-              .map(pr => `- ${pr.title} (#${pr.number}) by @${pr.user.login}`);
+            const mergedPRs = pulls.filter(pr => pr.merged_at && new Date(pr.merged_at) >= since);
 
-            require("fs").writeFileSync("pr_changelog.md", mergedPRs.length ? mergedPRs.join("\n") : "No updates this week.");
+            if (mergedPRs.length === 0) {
+              require("fs").writeFileSync("changelog.md", "# 🆕 Changelog - " + new Date().toISOString().split('T')[0] + "\n\n## ✅ Pull Requests Merged\nNo updates this week.");
+              return;
+            }
 
-      - name: Get Commits from last week
-        run: |
-          echo "# 🆕 Changelog - $(date +'%d/%m/%Y')" > changelog.md
-          echo "" >> changelog.md
+            let changelogContent = "# 🆕 Changelog - " + new Date().toISOString().split('T')[0] + "\n\n## ✅ Pull Requests Merged\n";
 
-          # Obter commits dos últimos 7 dias
-          commits=$(git log --pretty=format:"- %s (%h) by %an" --since="1 week ago")
+            for (const pr of mergedPRs) {
+              changelogContent += `\n### 🔹 ${pr.title} (#${pr.number}) by @${pr.user.login}\n`;
 
-          # Categorizar commits
-          echo "## 🔥 Novas Features" >> changelog.md
-          echo "$commits" | grep -iE "(add|new|feature|create|implement|🚀)" || echo "Nenhuma nova funcionalidade." >> changelog.md
-          echo "" >> changelog.md
+              // Obtém os commits do PR
+              const commits = await github.paginate(
+                github.rest.pulls.listCommits,
+                { owner, repo, pull_number: pr.number }
+              );
 
-          echo "## 🛠 Alterações" >> changelog.md
-          echo "$commits" | grep -iE "(update|change|modify|refactor|🔄)" || echo "Nenhuma alteração relevante." >> changelog.md
-          echo "" >> changelog.md
+              if (commits.length) {
+                changelogContent += "  **Commits:**\n";
+                for (const commit of commits) {
+                  const commitSha = commit.sha;
+                  const commitMessage = commit.commit.message;
+                  const commitAuthor = commit.commit.author?.name || "unknown";
 
-          echo "## ⚠️ Quebras de Compatibilidade" >> changelog.md
-          echo "$commits" | grep -iE "(remove|delete|break|incompatible|❌)" || echo "Nenhuma quebra detectada." >> changelog.md
-          echo "" >> changelog.md
+                  changelogContent += `  - **${commitMessage}** (by @${commitAuthor})\n`;
 
-          # Adicionar PRs ao changelog
-          echo "## ✅ Pull Requests Merged" >> changelog.md
-          cat pr_changelog.md >> changelog.md
-          echo "" >> changelog.md
+                  // Obtém o diff do commit
+                  const commitData = await github.rest.repos.getCommit({
+                    owner,
+                    repo,
+                    ref: commitSha
+                  });
 
-          cat changelog.md
+                  const patch = commitData.data.files
+                    .map(file => `\n  📝 **${file.filename}**\n  \`\`\`diff\n  ${file.patch || "No changes available"}\n  \`\`\``)
+                    .join("\n");
+
+                  changelogContent += patch + "\n";
+                }
+              }
+            }
+
+            require("fs").writeFileSync("changelog.md", changelogContent);
+
+      - name: Changelog
+        run: cat changelog.md
 
       - name: Commit and Push Changelog
         run: |
