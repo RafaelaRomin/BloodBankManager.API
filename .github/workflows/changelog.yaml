@@ -64,8 +64,8 @@ jobs:
               );
 
               if (commits.length) {
-                const commitMessages = commits.map(commit => `[${commit.commit.message}]`).join("|\n");
-                changelogContent += commitMessages + "|\n";
+                const commitMessages = commits.map(commit => `* [${commit.commit.message}]`).join("\n");
+                changelogContent += commitMessages + "\n";
               }
             }
 
