@@ -1,9 +1,12 @@
-2025-03-12 implement update endpoint (#3) by @RafaelaRomin
+### 📌 PR: 2025-03-12 implement update endpoint (#3) by @RafaelaRomin
+#### 🟢 Commits
 [implement update endpoint]|
 
-2025-03-12 Fix/controller path (#2) by @RafaelaRomin
+### 📌 PR: 2025-03-12 Fix/controller path (#2) by @RafaelaRomin
+#### 🟢 Commits
 [update route]|
 [Merge branch 'master' into fix/controller-path]|
 
-2025-03-12 adjusting donations route (#1) by @RafaelaRomin
+### 📌 PR: 2025-03-12 adjusting donations route (#1) by @RafaelaRomin
+#### 🟢 Commits
 [adjusting donations route]|
