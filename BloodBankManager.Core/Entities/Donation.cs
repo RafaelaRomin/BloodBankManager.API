@@ -14,11 +14,12 @@
         public int QuantityMl { get; private set; }
         public Donor Donor { get; private set; }
 
+        public string NewProperty { get; private set; }
+
         public void Update(int donorId, int quantityMl)
         {
             DonorId = donorId;
             QuantityMl = quantityMl;
         }
     }
-        
 }
