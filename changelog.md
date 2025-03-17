@@ -1,7 +1,11 @@
-# 🆕 Changelog - 2025-03-12
+2025-03-12 implement update endpoint (#3) by @RafaelaRomin
+[implement update endpoint]|
 
-## ✅ Pull Requests Merged
+2025-03-12 Fix/controller path (#2) by @RafaelaRomin
+[update route]|
+[Merge branch 'master' into fix/controller-path]|
 
+<<<<<<< HEAD
 ### 🔹 implement update endpoint (#3) by @RafaelaRomin
   **Commits:**
   - **implement update endpoint** (by @Rafaela Romin)
@@ -61,3 +65,7 @@
          {
              var query = new GetAllDonationsByDonorIdQuery(id);
   ```
+=======
+2025-03-12 adjusting donations route (#1) by @RafaelaRomin
+[adjusting donations route]|
+>>>>>>> e16ce4b04651ad935ee3dcae3aebe546960a3c27
