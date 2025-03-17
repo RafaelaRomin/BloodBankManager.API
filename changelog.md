@@ -1,3 +1,7 @@
+### 📌 PR: 2025-03-17 Create new property on donor entity (#4) by @RafaelaRomin
+#### 🟢 Commits
+* [Create new property on donor entity]
+
 ### 📌 PR: 2025-03-12 implement update endpoint (#3) by @RafaelaRomin
 #### 🟢 Commits
 * [implement update endpoint]
