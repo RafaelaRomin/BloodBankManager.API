@@ -54,7 +54,8 @@ jobs:
             for (const pr of mergedPRs) {
               const prDate = new Date(pr.merged_at).toISOString().split('T')[0];
 
-              changelogContent += `\n${prDate} ${pr.title} (#${pr.number}) by @${pr.user.login}\n`;
+              changelogContent += `\n### 📌 PR: ${prDate} ${pr.title} (#${pr.number}) by @${pr.user.login}\n`;
+              changelogContent += `#### 🟢 Commits\n`;
 
               // Obtém os commits do PR
               const commits = await github.paginate(
