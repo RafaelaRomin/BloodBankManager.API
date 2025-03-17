@@ -22,7 +22,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Get All Pull Requests merged with commit messages and diffs
+      - name: Get All Pull Requests merged with commit messages
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -45,14 +45,16 @@ jobs:
             const mergedPRs = pulls.filter(pr => pr.merged_at && new Date(pr.merged_at) >= since);
 
             if (mergedPRs.length === 0) {
-              require("fs").writeFileSync("changelog.md", "# 🆕 Changelog - " + new Date().toISOString().split('T')[0] + "\n\n## ✅ Pull Requests Merged\nNo updates this week.");
+              require("fs").writeFileSync("changelog.md", "No updates this week.");
               return;
             }
 
-            let changelogContent = "# 🆕 Changelog - " + new Date().toISOString().split('T')[0] + "\n\n## ✅ Pull Requests Merged\n";
+            let changelogContent = "";
 
             for (const pr of mergedPRs) {
-              changelogContent += `\n### 🔹 ${pr.title} (#${pr.number}) by @${pr.user.login}\n`;
+              const prDate = new Date(pr.merged_at).toISOString().split('T')[0];
+
+              changelogContent += `\n${prDate} ${pr.title} (#${pr.number}) by @${pr.user.login}\n`;
 
               // Obtém os commits do PR
               const commits = await github.paginate(
@@ -61,31 +63,12 @@ jobs:
               );
 
               if (commits.length) {
-                changelogContent += "  **Commits:**\n";
-                for (const commit of commits) {
-                  const commitSha = commit.sha;
-                  const commitMessage = commit.commit.message;
-                  const commitAuthor = commit.commit.author?.name || "unknown";
-
-                  changelogContent += `  - **${commitMessage}** (by @${commitAuthor})\n`;
-
-                  // Obtém o diff do commit
-                  const commitData = await github.rest.repos.getCommit({
-                    owner,
-                    repo,
-                    ref: commitSha
-                  });
-
-                  const patch = commitData.data.files
-                    .map(file => `\n  📝 **${file.filename}**\n  \`\`\`diff\n  ${file.patch || "No changes available"}\n  \`\`\``)
-                    .join("\n");
-
-                  changelogContent += patch + "\n";
-                }
+                const commitMessages = commits.map(commit => `[${commit.commit.message}]`).join("|\n");
+                changelogContent += commitMessages + "|\n";
               }
             }
 
-            require("fs").writeFileSync("changelog.md", changelogContent);
+            require("fs").writeFileSync("changelog.md", changelogContent.trim());
 
       - name: Changelog
         run: cat changelog.md
@@ -93,8 +76,8 @@ jobs:
       - name: Commit and Push Changelog
         run: |
           git add changelog.md
-          git commit -m "📝 Update Changelog"
-          git branch -M master # Garante que está na branch correta
+          git commit -m "Update Changelog"
+          git branch -M master 
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin master
         env:
