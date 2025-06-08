@@ -1,8 +1,4 @@
-## Blood Bank Manager 
-
-## 📜 Changelog
-
-Consulte as versões, atualizações e histórico completo em [CHANGELOG.md](.github/CHANGELOG.md).
+## Project Readme   | 📜 [Changelog](.github/CHANGELOG.md)  
 
 
 #### Este projeto é uma API web que implementa um sistema de gerenciamento de um banco de sangue.
